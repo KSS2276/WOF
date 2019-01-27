@@ -21,12 +21,15 @@ namespace Com.WOF.Sungsoo
 
         #region Priavte Fields
 
+        bool isConnecting;
         /// <summary>
         /// This client's version number. Users are separated from each other by gameVersion (which allows you to make breaking changes).
         /// </summary>
 
         string gameVersion = "1";
         #endregion
+
+        public static int randomRoomNumber;
 
         #region MonoBehaviour CallBacks
         #endregion
@@ -53,6 +56,8 @@ namespace Com.WOF.Sungsoo
 
         public void Connect()
         {
+            isConnecting = true;
+
             if (PhotonNetwork.IsConnected)
             {
                 PhotonNetwork.JoinRandomRoom();
@@ -73,7 +78,10 @@ namespace Com.WOF.Sungsoo
         public override void OnConnectedToMaster()
         {
             Debug.Log("PUN Basics Tutorial/Launcher: OnConnectedToMaster() was called by PUN");
-            PhotonNetwork.JoinRandomRoom();
+            if (isConnecting)
+            {
+                PhotonNetwork.JoinRandomRoom();
+            }
         }
 
         public override void OnDisconnected(DisconnectCause cause)
@@ -92,7 +100,16 @@ namespace Com.WOF.Sungsoo
 
         public override void OnJoinedRoom()
         {
+            //randomRoomNumber = Random.RandomRange(1, 4);
+            randomRoomNumber = 1;
             Debug.Log("PUN Basics Tutorial/Launcher: OnJoinedRoom() called by PUN. Now this client is in a room.");
+
+            if (randomRoomNumber == 1)
+            {
+                Debug.Log("We load the 'Room for 1' ");
+
+                PhotonNetwork.LoadLevel("Room for 1");
+            }
         }
 
         #endregion
