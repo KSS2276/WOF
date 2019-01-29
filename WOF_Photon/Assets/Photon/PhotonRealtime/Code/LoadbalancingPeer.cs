@@ -1728,7 +1728,7 @@ namespace Photon.Realtime
         private bool broadcastPropsChangeToAll = true;
 
         #if SERVERSDK
-        public bool CheckUserOnJoin { get; set; }
+        public bool CheckUserOnJoin { get; set; }F
         #endif
     }
 
