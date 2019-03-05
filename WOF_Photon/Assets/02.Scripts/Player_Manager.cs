@@ -9,6 +9,7 @@ namespace Com.WOF.Sungsoo
     {
 
         CharacterController controller;
+        Animator animator;
         public Transform[] respawns;
 
         private Vector3 MoveDir;
@@ -21,10 +22,11 @@ namespace Com.WOF.Sungsoo
 
 
         // Use this for initialization
-        IEnumerator Start()
+        void Start()
         {
-            yield return null;
             controller = GetComponent<CharacterController>();
+            animator = GetComponent<Animator>();
+
             MoveDir = Vector3.zero;
             respawns = GameObject.Find("Respawn").GetComponentsInChildren<Transform>();
         }
@@ -45,7 +47,6 @@ namespace Com.WOF.Sungsoo
             if (controller.isGrounded && isJump)
             {
                 MoveDir.y = jumpSpeed;
-
             }
             isJump = false;
 
@@ -53,13 +54,10 @@ namespace Com.WOF.Sungsoo
             controller.Move(MoveDir * Time.deltaTime);
         }
 
-        //void OnTriggerEnter(Collider col)
-        //{
-        //    if (col.gameObject.name == "DropDie")
-        //    {
-        //        int a = Random.RandomRange(0, respawnPlace.Length);
-        //    }
-        //}
+        public void MoveAnimator(string animName, bool animState)
+        {            
+            animator.SetBool(animName, animState);
+        }
 
     }
 }

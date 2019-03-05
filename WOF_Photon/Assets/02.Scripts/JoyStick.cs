@@ -65,16 +65,16 @@ namespace Com.WOF.Sungsoo
             else
                 Stick.position = StickFirstPos + JoyVec * Radius;
 
-            if (JoyVec.x > 0.3 && JoyVec.x < 1) // 앞으로
+            if (JoyVec.y < 0.6 && (JoyVec.x > 0.3 && JoyVec.x < 1)) // 앞으로
             {
                 PlayerTr.eulerAngles = new Vector3(0, 90, 0);
-
+                Player.MoveAnimator("run", true);
             }
 
-            if (JoyVec.x < -0.3 && JoyVec.x > -1) // 뒤로
+            if (JoyVec.y < 0.6 && (JoyVec.x < -0.3 && JoyVec.x > -1)) // 뒤로
             {
                 PlayerTr.eulerAngles = new Vector3(0, -90, 0);
-
+                Player.MoveAnimator("run", true);
             }
 
             if (JoyVec.y > 0.6) // 점프
@@ -95,6 +95,7 @@ namespace Com.WOF.Sungsoo
             Stick.position = StickFirstPos; // 스틱을 원래의 위치로.
             JoyVec = Vector3.zero;          // 방향을 0으로.
             MoveFlag = false;
+            Player.MoveAnimator("run", false);
         }
     }
 }
