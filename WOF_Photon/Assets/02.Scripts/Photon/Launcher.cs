@@ -1,4 +1,4 @@
-﻿//using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -35,6 +35,9 @@ namespace Com.WOF.Sungsoo
 
         [SerializeField]
         private GameObject MultiPlay_Panel;
+
+        [SerializeField]
+        private List<GameObject> SingleMode_Theme = new List<GameObject>();
         #endregion
 
         #region Priavte Fields
@@ -46,7 +49,8 @@ namespace Com.WOF.Sungsoo
 
         string gameVersion = "1";
 
-        struct PlayerInfo
+        [SerializeField]
+        public class PlayerInfo
         {
             public string check;
             public string username;
@@ -56,18 +60,30 @@ namespace Com.WOF.Sungsoo
             public int death;
             public int assi;
 
-            public struct scJSON
-            {
-                public List<bool> character;
-                public List<int> stage;
-            };
 
-            public scJSON scJson;
-        };
+            //public class stage_char_JSON
+            //{
+            //    public bool[] character;
+            //    public int[] stage;
+            //    public int[] stage_Max;
+            //}
+
+        }
+
+        [Serializable]
+        public class stage_char_JSON
+        {
+            public bool[] character;
+            public int[] stage;
+            public int[] stage_Max;
+        }
+
+
 
         #endregion
 
         PlayerInfo user = new PlayerInfo();
+        stage_char_JSON scJSON = new stage_char_JSON();
 
         public static int randomRoomNumber;
 
@@ -86,6 +102,7 @@ namespace Com.WOF.Sungsoo
         void Awake()
         {
             StartCoroutine(AwakeCor());
+            scJSON.stage_Max = new int[] { 8, 8, 8, 8, 8, 8 };
         }
 
         IEnumerator AwakeCor()
@@ -104,6 +121,9 @@ namespace Com.WOF.Sungsoo
 
             if (wwwResult != "Unauthorized")
             {
+                Debug.Log(JsonUtility.FromJson<PlayerInfo>(wwwResult));
+                Debug.Log(JsonUtility.FromJson<PlayerInfo>(wwwResult).check);
+                Debug.Log(JsonUtility.FromJson<PlayerInfo>(wwwResult).username);
                 user.check = JsonUtility.FromJson<PlayerInfo>(wwwResult).check;
                 user.username = JsonUtility.FromJson<PlayerInfo>(wwwResult).username;
 
@@ -168,7 +188,7 @@ namespace Com.WOF.Sungsoo
 
         public void CreateRoom()
         {
-            int roomNum = Random.RandomRange(0, 100);
+            int roomNum = UnityEngine.Random.RandomRange(0, 100);
             PhotonNetwork.CreateRoom("" + roomNum, new RoomOptions { MaxPlayers = maxPlayersPerRoom });
         }
 
@@ -182,25 +202,52 @@ namespace Com.WOF.Sungsoo
             WWWForm form = new WWWForm();
             form.AddField("code", user.serialNum);
 
-            WWW www = new WWW(serverURL + "single",form);
+            WWW www = new WWW(serverURL + "single", form);
             yield return www;
 
-            string wwwResult;
-            wwwResult = www.text;
+            string wwwResult = www.text;
 
             if (wwwResult != "Unauthorized")
             {
-                Debug.Log(JsonUtility.FromJson<PlayerInfo.scJSON>(wwwResult));
-                Debug.Log(JsonUtility.FromJson<PlayerInfo.scJSON>(wwwResult).character);
-                Debug.Log(JsonUtility.FromJson<PlayerInfo.scJSON>(wwwResult).stage);
-                user.scJson.character = JsonUtility.FromJson<PlayerInfo.scJSON>(wwwResult).character;
-                user.scJson.stage = JsonUtility.FromJson<PlayerInfo.scJSON>(wwwResult).stage;
-                Debug.Log("GoToSinglePlay_Result : " + wwwResult);
+                //{
+                //    "check":"true",
+                //    "scJSON":{"character":[false,false,false,false,false,false], "stage":[1,0,0,0,0,0]}
+                //}
+
+                Debug.Log("GoToSinglePlay_Result : " + wwwResult); // Json 결과 값 콘솔 창에 표시.
+                Debug.Log(JsonUtility.FromJson<PlayerInfo>(wwwResult).check); 
+
+
+                scJSON.stage = JsonUtility.FromJson<stage_char_JSON>(wwwResult).stage; 
+                scJSON.character = JsonUtility.FromJson<stage_char_JSON>(wwwResult).character;
 
                 GameMode_Panel.SetActive(false);
                 SinglePlay_Panel.SetActive(true);
 
-                //if(user.scJson.character[])
+                SinglePlay_Panel.transform.GetChild(0).GetChild(1).GetComponent<Scrollbar>().value = 0; // 싱글모드 스크롤바 값 초기화.
+
+                for (int i = 0; i < scJSON.character.Length; i++)
+                {
+                    if (scJSON.character[i])
+                    {
+                        SingleMode_Theme[i].GetComponent<Button>().interactable = true;
+                        SingleMode_Theme[i].GetComponent<Image>().color = new Color32(255, 255, 255, 255);
+                    }
+                    else if(i < 5 && !scJSON.character[i])
+                    {
+                        SingleMode_Theme[i + 1].GetComponent<Button>().interactable = false;
+                        SingleMode_Theme[i + 1].GetComponent<Image>().color = new Color32(150, 150, 150, 255);
+                    }
+                    else if(i == 5 && !scJSON.character[i])
+                    {
+                        SingleMode_Theme[i].GetComponent<Button>().interactable = false;
+                        SingleMode_Theme[i].GetComponent<Image>().color = new Color32(150, 150, 150, 255);
+                    }
+
+                    SingleMode_Theme[i].transform.GetChild(0).GetComponent<Text>().text = scJSON.stage[i] + " / " + scJSON.stage_Max[i];
+                    // 스테이지 별 현재 깬 스테이지 / 맥스 스테이지 표시.
+
+                }
             }
             else
             {
@@ -240,7 +287,7 @@ namespace Com.WOF.Sungsoo
 
         public override void OnJoinedRoom()
         {
-            randomRoomNumber = Random.RandomRange(1, 4);
+            randomRoomNumber = UnityEngine.Random.RandomRange(1, 4);
             Debug.Log("PUN Basics Tutorial/Launcher: OnJoinedRoom() called by PUN. Now this client is in a room.");
             Debug.Log("We load the 'Room for '" + randomRoomNumber);
             PhotonNetwork.LoadLevel("CollectChar");
