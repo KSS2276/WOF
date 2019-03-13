@@ -9,14 +9,17 @@ namespace Com.WOF.Sungsoo
     {
 
         CharacterController controller;
+        Rigidbody rb;
         Animator animator;
         public Transform[] respawns;
 
         private Vector3 MoveDir;
 
         public bool isJump = false;
-        public float jumpSpeed = 5.0f;
-        public float gravity = 20.0f;
+        int jumpCount = 2;
+        bool alreadyJump;
+        public float jumpSpeed = 7.0f;
+        public float gravity = 1.0f;
 
         [SerializeField] JoyStick joystick;
 
@@ -25,6 +28,7 @@ namespace Com.WOF.Sungsoo
         void Start()
         {
             controller = GetComponent<CharacterController>();
+            rb = GetComponent<Rigidbody>();
             animator = GetComponent<Animator>();
 
             MoveDir = Vector3.zero;
@@ -33,7 +37,12 @@ namespace Com.WOF.Sungsoo
 
         public void IsJump()
         {
-            isJump = true;
+            if (jumpCount > 0)
+            {
+                isJump = true;
+                JoyStick.jumpComplete = false;
+            }
+
         }
 
         public void ChangLayer(int num)
@@ -44,6 +53,7 @@ namespace Com.WOF.Sungsoo
         // Update is called once per frame
         void Update()
         {
+
             if (controller.isGrounded && isJump)
             {
                 MoveDir.y = jumpSpeed;
@@ -54,8 +64,9 @@ namespace Com.WOF.Sungsoo
             controller.Move(MoveDir * Time.deltaTime);
         }
 
+
         public void MoveAnimator(string animName, bool animState)
-        {            
+        {
             animator.SetBool(animName, animState);
         }
 

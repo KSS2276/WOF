@@ -15,16 +15,16 @@ TagManager:
   - 
   - PostProcessing
   - Player
-  - Floor1
-  - Floor2
-  - Floor3
-  - Floor4
-  - Floor5
-  - Floor6
-  - Floor7
-  - Floor8
-  - Floor9
-  - Floor10
+  - LS1
+  - RS1
+  - LS2
+  - RS2
+  - LS3
+  - RS3
+  - LS4
+  - RS4
+  - LS5
+  - RS5
   - 
   - 
   - 

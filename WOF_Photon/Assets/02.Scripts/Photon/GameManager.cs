@@ -11,7 +11,25 @@ namespace Com.WOF.Sungsoo
     {
         public static GameManager Instance;
         public GameObject playerPrefab;
+        public GameObject Player;
+        public Transform PlayerRoof;
 
+        [SerializeField]
+        private GameObject joyStick;
+
+        [SerializeField]
+        private Transform Floor_Comp;
+
+        public Transform Lstair_Comp;
+
+        public Transform Rstair_Comp;
+
+        public Transform Lstair_Diff;
+
+        public Transform Rstair_Diff;
+
+        public Transform Floor_Diff;
+        float HoldZ = -1.43f;
         #region Photon Callbacks
 
         public override void OnLeftRoom()
@@ -20,6 +38,12 @@ namespace Com.WOF.Sungsoo
         }
 
         #endregion
+
+        void Awake()
+        {
+
+        }
+
 
         // Start is called before the first frame update
         void Start()
@@ -39,19 +63,25 @@ namespace Com.WOF.Sungsoo
                 {
                     Debug.LogFormat("We are Instantiating LocalPlayer from {0}", SceneManagerHelper.ActiveSceneName);
                     // we're in a room. spawn a character for the local player. it gets synced by using PhotonNetwork.Instantiate
-                    PhotonNetwork.Instantiate(this.playerPrefab.name, new Vector3(0f, 5f, 0f), Quaternion.identity, 0);
+                    Player = PhotonNetwork.Instantiate(this.playerPrefab.name, new Vector3(0f, 5f, 0f), Quaternion.identity, 0) as GameObject;
                 }
                 else
                 {
                     Debug.LogFormat("Ignoring scene load for {0}", SceneManagerHelper.ActiveSceneName);
                 }
             }
+
+            //PlayerRoof = Player.transform.GetChild(Player.transform.childCount - 1);
+            PlayerRoof = Player.transform.GetChild(Player.transform.childCount - 1);
         }
 
         // Update is called once per frame
         void Update()
         {
-
+            Char_Floor_Relation();
+            Player.transform.position = new Vector3(Player.transform.position.x, Player.transform.position.y, HoldZ);
+            Char_Lstair_Relation();
+            Char_Rstair_Relation();
         }
 
         #region Public Methods
@@ -65,8 +95,91 @@ namespace Com.WOF.Sungsoo
 
         #region Private Methods
 
+
+        void Char_Floor_Relation()
+        {
+            for (int i = 0; i < Floor_Comp.childCount; i++)
+            {
+                if (PlayerRoof.position.y > Floor_Comp.GetChild(i).position.y)
+                    Floor_Comp.GetChild(i).GetComponent<BoxCollider>().isTrigger = false;
+                else
+                    Floor_Comp.GetChild(i).GetComponent<BoxCollider>().isTrigger = true;
+            }
+
+            for (int i = 0; i < Floor_Diff.childCount; i++)
+            {
+                if (Vector3.Distance(PlayerRoof.position ,Floor_Diff.GetChild(i).GetChild(0).position) < 0.6f && (joyStick.GetComponent<JoyStick>().JoyVec.y <= -0.8f))
+                {
+                    Floor_Diff.GetChild(i).GetComponent<BoxCollider>().isTrigger = true;
+                }
+                else if (PlayerRoof.position.y < Floor_Diff.GetChild(i).position.y)
+                {
+                    Floor_Diff.GetChild(i).GetComponent<BoxCollider>().isTrigger = true;
+                }
+                else if (PlayerRoof.position.y > Floor_Diff.GetChild(i).position.y && (joyStick.GetComponent<JoyStick>().JoyVec.y > -0.8f))
+                {
+                    Floor_Diff.GetChild(i).GetComponent<BoxCollider>().isTrigger = false;
+                }
+                else if (PlayerRoof.position.y > Floor_Diff.GetChild(i).position.y && (joyStick.GetComponent<JoyStick>().JoyVec.y < -0.8f))
+                {
+                    Floor_Diff.GetChild(i).GetComponent<BoxCollider>().isTrigger = false;
+                }
+            }
+        }
+
+        void Char_Lstair_Relation()
+        {
+            for (int i = 0; i < Lstair_Comp.childCount; i++)
+            {
+                if (PlayerRoof.position.y > Lstair_Comp.GetChild(i).GetChild(0).position.y)
+                {
+                    Lstair_Comp.GetChild(i).GetComponent<BoxCollider>().isTrigger = false;
+                }
+                else
+                {
+                    Lstair_Comp.GetChild(i).GetComponent<BoxCollider>().isTrigger = true;
+                }
+            }
+
+            for (int i = 0; i < Lstair_Diff.childCount; i++)
+            {
+                if (PlayerRoof.position.y > Lstair_Diff.GetChild(i).GetChild(0).position.y)
+                {
+                    Lstair_Diff.GetChild(i).GetComponent<BoxCollider>().isTrigger = false;
+                }
+                else
+                {
+                    Lstair_Diff.GetChild(i).GetComponent<BoxCollider>().isTrigger = true;
+                }
+            }
+        }
+
+        void Char_Rstair_Relation()
+        {
+            for (int i = 0; i < Rstair_Comp.childCount; i++)
+            {
+                if (PlayerRoof.position.y > Rstair_Comp.GetChild(i).GetChild(0).position.y)
+                {
+                    Rstair_Comp.GetChild(i).GetComponent<BoxCollider>().isTrigger = false;
+                }
+                else
+                {
+                    Rstair_Comp.GetChild(i).GetComponent<BoxCollider>().isTrigger = true;
+                }
+            }
+
+            if (PlayerRoof.position.y > Rstair_Diff.GetChild(0).position.y)
+            {
+                Rstair_Diff.GetComponent<BoxCollider>().isTrigger = false;
+            }
+            else
+            {
+                Rstair_Diff.GetComponent<BoxCollider>().isTrigger = true;
+            }
+        }
+
         void LoadArena()
-        {           
+        {
 
             if (!PhotonNetwork.IsMasterClient)
             {

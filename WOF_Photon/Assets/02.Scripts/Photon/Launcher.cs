@@ -38,6 +38,7 @@ namespace Com.WOF.Sungsoo
 
         [SerializeField]
         private List<GameObject> SingleMode_Theme = new List<GameObject>();
+ 
         #endregion
 
         #region Priavte Fields
@@ -48,6 +49,9 @@ namespace Com.WOF.Sungsoo
         /// </summary>
 
         string gameVersion = "1";
+
+
+ 
 
         [SerializeField]
         public class PlayerInfo

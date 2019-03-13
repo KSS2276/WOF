@@ -22,6 +22,7 @@ namespace Com.WOF.Sungsoo
 
         private string serverURL = "http://13.209.6.8:3000/";
 
+
         struct PlayerInfo
         {
             public string s_Nickname;
