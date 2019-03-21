@@ -62,8 +62,6 @@ namespace Com.WOF.Sungsoo
         string gameVersion = "1";
 
 
-
-
         [SerializeField]
         public class PlayerInfo
         {
@@ -85,8 +83,6 @@ namespace Com.WOF.Sungsoo
             public int[] stage_Max;
         }
 
-
-
         #endregion
 
         PlayerInfo user = new PlayerInfo();
@@ -104,8 +100,6 @@ namespace Com.WOF.Sungsoo
         public GameObject u_AlarmBar;
         public InputField u_InputNick;
 
-        //public InputField u_PW;
-        //public InputField u_PW_CaaAZ;
         #endregion
 
 
@@ -114,6 +108,148 @@ namespace Com.WOF.Sungsoo
             StartCoroutine(AwakeCor());
             scJSON.stage_Max = new int[] { 8, 8, 8, 8, 8, 8 };
         }
+
+        // Start is called before the first frame update
+        void Start()
+        {
+            Progress_Label.SetActive(false);
+            Control_Panel.SetActive(true);
+        }
+
+        // Update is called once per frame
+        void Update()
+        {
+
+        }
+        #region Public Methods
+
+
+        public void Login()
+        {
+            StartCoroutine(LoginCor());
+        }
+
+        public void GoToMultiPlay_Setting()
+        {
+            GameMode_Panel.SetActive(false);
+            isSingleFinished = false;
+            isMultiFinished = true;
+            PhotonNetwork.AutomaticallySyncScene = true;
+        }
+
+        public void CreateRoom()
+        {
+            int roomNum = UnityEngine.Random.RandomRange(0, 100);
+            PhotonNetwork.CreateRoom("" + roomNum, new RoomOptions { MaxPlayers = maxPlayersPerRoom });
+        }
+
+        public void GoToSinglePlay_Setting()
+        {
+            StartCoroutine(GoToSinglePlaySetting_Cor());
+        }
+
+        //    "scJSON":{"character":[false,false,false,false,false,false], "stage":[1,0,0,0,0,0]}
+
+        public void SinglePlay_ChoiceTheme()
+        {
+            try
+            {
+                themeSeq = EventSystem.current.currentSelectedGameObject.transform.GetSiblingIndex(); // 클릭한 테마의 배열번호 temp에 저장.
+            }
+            catch
+            {
+
+            }
+
+            Debug.Log(themeSeq);
+
+            SinglePlay_Theme.SetActive(false); // 테마 false
+            SinglePlay_EachStage.SetActive(true); // 선택한 스테이지 부모 true
+
+            SinglePlay_EachStage.transform.GetChild(themeSeq).GetChild(1).GetChild(1).GetComponent<Scrollbar>().value = 0;
+
+            for (int i = 0; i < SinglePlay_EachStage.transform.childCount; i++)
+                SinglePlay_EachStage.transform.GetChild(i).gameObject.SetActive(false);
+
+            SinglePlay_EachStage.transform.GetChild(themeSeq).gameObject.SetActive(true);
+            Character_Panel.SetActive(true);
+
+            for (int i = 0; i < scJSON.stage[themeSeq]; i++)
+            {
+                SinglePlay_EachStage.transform.GetChild(themeSeq).GetChild(1).GetChild(0).GetChild(0).GetChild(i).GetComponent<Button>().interactable = true;
+            }
+
+            for (int i = 0; i < scJSON.character.Length; i++) // 캐릭터 패널 초기화.
+            {
+                if (scJSON.character[i])
+                {
+                    Character_Panel.transform.GetChild(i + 1).GetComponent<Button>().interactable = true;
+                }
+                else
+                {
+                    Character_Panel.transform.GetChild(i + 1).GetComponent<Button>().interactable = false;
+                }
+            }
+        }
+
+        public void Choice_Character() // 캐릭터 고르기.
+        {
+            Selected_CharName = EventSystem.current.currentSelectedGameObject.name;
+            Character_Panel.transform.GetChild(Character_Panel.transform.childCount - 1).position = EventSystem.current.currentSelectedGameObject.transform.position;
+        }
+
+        public void GoToSinglePlay() // 선택한 싱글 게임 입장.
+        {
+            SceneManager.LoadScene("S" + (EventSystem.current.currentSelectedGameObject.transform.parent.parent.parent.parent.GetSiblingIndex() + 1) + (EventSystem.current.currentSelectedGameObject.transform.GetSiblingIndex() + 1));
+        }
+
+        public void LeaveSinglePlay()
+        {
+            StartCoroutine(AwakeCor());
+        }
+
+
+        #endregion
+
+        //#region MonoBehaviourPunCallbacks Callbacks
+
+        //public override void OnConnectedToMaster()
+        //{
+        //    Debug.Log("PUN Basics Tutorial/Launcher: OnConnectedToMaster() was called by PUN");
+        //    if (isConnecting)
+        //    {
+        //        PhotonNetwork.JoinRandomRoom();
+        //    }
+        //}
+
+        //public override void OnDisconnected(DisconnectCause cause)
+        //{
+        //    Debug.LogWarningFormat("PUN Basics Tutorial/Launcher: OnDisconnected() was called by PUN with reason {0}", cause);
+
+        //    Progress_Label.SetActive(false);
+        //    Control_Panel.SetActive(true);
+        //}
+
+        //public override void OnJoinRandomFailed(short returnCode, string message)
+        //{
+        //    Debug.Log("PUN Basics Tutorial/Launcher:OnJoinRandomFailed() was called by PUN. No random room available, so we create one.\nCalling: PhotonNetwork.CreateRoom");
+        //    //PhotonNetwork.CreateRoom(null, new RoomOptions { MaxPlayers = maxPlayersPerRoom });
+        //    CreateRoom();
+        //}
+
+        //public override void OnJoinedRoom()
+        //{
+        //    randomRoomNumber = UnityEngine.Random.RandomRange(1, 4);
+        //    Debug.Log("PUN Basics Tutorial/Launcher: OnJoinedRoom() called by PUN. Now this client is in a room.");
+        //    Debug.Log("We load the 'Room for '" + randomRoomNumber);
+        //    PhotonNetwork.LoadLevel("CollectChar");
+
+        //    //PhotonNetwork.LoadLevel("Room for " + randomRoomNumber);
+        //}
+
+        //#endregion
+
+        #region Coroutine
 
         IEnumerator AwakeCor()
         {
@@ -157,7 +293,6 @@ namespace Com.WOF.Sungsoo
                     GoToSinglePlay_Setting();
                     yield return new WaitForSeconds(0.1f);
                     SinglePlay_ChoiceTheme();
-
                 }
                 //멀티 모드 종료 시 구현해야함. 190314
                 else
@@ -174,51 +309,50 @@ namespace Com.WOF.Sungsoo
             {
                 StartCoroutine(Send_Alarm("닉네임 생성이 실패하였습니다."));
             }
-
-            //PhotonNetwork.AutomaticallySyncScene = true;
         }
 
-        // Start is called before the first frame update
-        void Start()
+        IEnumerator LoginCor()
         {
-            //DontDestroyOnLoad(gameObject);
-            Progress_Label.SetActive(false);
-            Control_Panel.SetActive(true);
-        }
+            string serialNum = SystemInfo.deviceUniqueIdentifier;
 
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
-
-        #region Public Methods
+            Regex nickNameRule = new Regex(@"^[a-zA-Z]+[0-9]{4,14}$"); //영어, 숫자 조합 확인.
+            Regex nickNameRule2 = new Regex(@"^[가-힣]{2,7}$"); // 한글 확인.
 
 
-        public void Login()
-        {
-            StartCoroutine(LoginCor());
-        }
+            Match nickNameChecking = nickNameRule.Match(u_InputNick.text);
+            Match nickNameChecking2 = nickNameRule2.Match(u_InputNick.text);
 
+            //isConnecting = true;
 
+            if (u_InputNick.text == "")
+            {
+                StartCoroutine(Send_Alarm("닉네임을 확인해주세요."));
+            }
 
-        public void GoToMultiPlay_Setting()
-        {
-            GameMode_Panel.SetActive(false);
-            isSingleFinished = false;
-            isMultiFinished = true;
-            PhotonNetwork.AutomaticallySyncScene = true;
-        }
+            else
+            {
+                WWWForm form = new WWWForm();
+                form.AddField("username", u_InputNick.text);
+                form.AddField("code", serialNum);
+                //form.AddField("password", u_PW.text);
+                //form.AddField("code", DateTime.Now.ToString("yyyyMMddHHmmss"));
 
-        public void CreateRoom()
-        {
-            int roomNum = UnityEngine.Random.RandomRange(0, 100);
-            PhotonNetwork.CreateRoom("" + roomNum, new RoomOptions { MaxPlayers = maxPlayersPerRoom });
-        }
+                WWW www = new WWW(serverURL + "login", form);
+                yield return www;
+                string wwwReuslt = www.text;
+                Debug.Log(wwwReuslt);
 
-        public void GoToSinglePlay_Setting()
-        {
-            StartCoroutine(GoToSinglePlaySetting_Cor());
+                if (wwwReuslt != "Unauthorized")
+                {
+                    Control_Panel.SetActive(false);
+                    GameMode_Panel.SetActive(true);
+                    StartCoroutine(Send_Alarm("닉네임이 생성되었습니다."));
+                }
+                else
+                {
+                    StartCoroutine(Send_Alarm("닉네임 생성이 실패하였습니다."));
+                }
+            }
         }
 
         IEnumerator GoToSinglePlaySetting_Cor()
@@ -279,152 +413,6 @@ namespace Com.WOF.Sungsoo
                 StartCoroutine(Send_Alarm("서버와 연결이 끊어졌습니다."));
             }
 
-        }
-        //    "scJSON":{"character":[false,false,false,false,false,false], "stage":[1,0,0,0,0,0]}
-
-        public void SinglePlay_ChoiceTheme()
-        {
-            try
-            {
-                themeSeq = EventSystem.current.currentSelectedGameObject.transform.GetSiblingIndex(); // 클릭한 테마의 배열번호 temp에 저장.
-            }
-            catch
-            {
-                
-            }
-
-            Debug.Log(themeSeq);
-
-            SinglePlay_Theme.SetActive(false); // 테마 false
-            SinglePlay_EachStage.SetActive(true); // 선택한 스테이지 부모 true
-
-            SinglePlay_EachStage.transform.GetChild(themeSeq).GetChild(1).GetChild(1).GetComponent<Scrollbar>().value = 0;
-
-            for (int i = 0; i < SinglePlay_EachStage.transform.childCount; i++)
-                SinglePlay_EachStage.transform.GetChild(i).gameObject.SetActive(false);
-
-            SinglePlay_EachStage.transform.GetChild(themeSeq).gameObject.SetActive(true);
-            Character_Panel.SetActive(true);
-
-            for (int i = 0; i < scJSON.stage[themeSeq]; i++)
-            {
-                SinglePlay_EachStage.transform.GetChild(themeSeq).GetChild(1).GetChild(0).GetChild(0).GetChild(i).GetComponent<Button>().interactable = true;
-            }
-
-            for (int i = 0; i < scJSON.character.Length; i++) // 캐릭터 패널 초기화.
-            {
-                if (scJSON.character[i])
-                {
-                    Character_Panel.transform.GetChild(i + 1).GetComponent<Button>().interactable = true;
-                }
-                else
-                {
-                    Character_Panel.transform.GetChild(i + 1).GetComponent<Button>().interactable = false;
-                }
-            }
-        }
-
-        public void Choice_Character() // 캐릭터 고르기.
-        {
-            Selected_CharName = EventSystem.current.currentSelectedGameObject.name;
-            Character_Panel.transform.GetChild(Character_Panel.transform.childCount - 1).position = EventSystem.current.currentSelectedGameObject.transform.position;
-        }
-
-        public void GoToSinglePlay() // 선택한 싱글 게임 입장.
-        {
-            SceneManager.LoadScene("S"+(EventSystem.current.currentSelectedGameObject.transform.parent.parent.parent.parent.GetSiblingIndex()+1)+(EventSystem.current.currentSelectedGameObject.transform.GetSiblingIndex()+1));
-        }
-
-        public void LeaveSinglePlay()
-        {
-            StartCoroutine(AwakeCor());
-        }
-
-
-        #endregion
-
-        #region MonoBehaviourPunCallbacks Callbacks
-
-        public override void OnConnectedToMaster()
-        {
-            Debug.Log("PUN Basics Tutorial/Launcher: OnConnectedToMaster() was called by PUN");
-            if (isConnecting)
-            {
-                PhotonNetwork.JoinRandomRoom();
-            }
-        }
-
-        public override void OnDisconnected(DisconnectCause cause)
-        {
-            Debug.LogWarningFormat("PUN Basics Tutorial/Launcher: OnDisconnected() was called by PUN with reason {0}", cause);
-
-            Progress_Label.SetActive(false);
-            Control_Panel.SetActive(true);
-        }
-
-        public override void OnJoinRandomFailed(short returnCode, string message)
-        {
-            Debug.Log("PUN Basics Tutorial/Launcher:OnJoinRandomFailed() was called by PUN. No random room available, so we create one.\nCalling: PhotonNetwork.CreateRoom");
-            //PhotonNetwork.CreateRoom(null, new RoomOptions { MaxPlayers = maxPlayersPerRoom });
-            CreateRoom();
-        }
-
-        public override void OnJoinedRoom()
-        {
-            randomRoomNumber = UnityEngine.Random.RandomRange(1, 4);
-            Debug.Log("PUN Basics Tutorial/Launcher: OnJoinedRoom() called by PUN. Now this client is in a room.");
-            Debug.Log("We load the 'Room for '" + randomRoomNumber);
-            PhotonNetwork.LoadLevel("CollectChar");
-
-            //PhotonNetwork.LoadLevel("Room for " + randomRoomNumber);
-        }
-
-        #endregion
-
-        #region Coroutine
-
-        IEnumerator LoginCor()
-        {
-            string serialNum = SystemInfo.deviceUniqueIdentifier;
-
-            Regex nickNameRule = new Regex(@"^[a-zA-Z]+[0-9]{4,14}$"); //영어, 숫자 조합 확인.
-            Regex nickNameRule2 = new Regex(@"^[가-힣]{2,7}$"); // 한글 확인.
-
-
-            Match nickNameChecking = nickNameRule.Match(u_InputNick.text);
-            Match nickNameChecking2 = nickNameRule2.Match(u_InputNick.text);
-
-            //isConnecting = true;
-
-            if (u_InputNick.text == "")
-            {
-                StartCoroutine(Send_Alarm("닉네임을 확인해주세요."));
-            }
-
-            else
-            {
-                WWWForm form = new WWWForm();
-                form.AddField("username", u_InputNick.text);
-                form.AddField("code", serialNum);
-                //form.AddField("password", u_PW.text);
-                //form.AddField("code", DateTime.Now.ToString("yyyyMMddHHmmss"));
-
-                WWW www = new WWW(serverURL + "login", form);
-                yield return www;
-                string wwwReuslt = www.text;
-                Debug.Log(wwwReuslt);
-
-                if (wwwReuslt != "Unauthorized")
-                {
-                    Control_Panel.SetActive(false);
-                    GameMode_Panel.SetActive(true);
-                    StartCoroutine(Send_Alarm("닉네임이 생성되었습니다."));
-                }
-                else
-                {
-                    StartCoroutine(Send_Alarm("닉네임 생성이 실패하였습니다."));
-                }
-            }
         }
 
         IEnumerator Send_Alarm(string message)
