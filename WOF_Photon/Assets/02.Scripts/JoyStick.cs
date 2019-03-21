@@ -8,7 +8,7 @@ namespace Com.WOF.Sungsoo
 
     public class JoyStick : MonoBehaviour
     {
-        [SerializeField] Player_Manager Player;
+        [SerializeField] SinglePlay_PlayerManager Player;
         // 공개
         [SerializeField]
         private Transform PlayerTr;        // 플레이어.
@@ -39,7 +39,7 @@ namespace Com.WOF.Sungsoo
         {
             yield return PlayerTr.gameObject.activeSelf;
             PlayerTr = GameObject.FindWithTag("Player").transform;
-            Player = PlayerTr.GetComponent<Player_Manager>();
+            Player = PlayerTr.GetComponent<SinglePlay_PlayerManager>();
             Radius = GetComponent<RectTransform>().sizeDelta.y * 0.5f;
             StickFirstPos = Stick.transform.position;
 
@@ -49,20 +49,20 @@ namespace Com.WOF.Sungsoo
 
             MoveFlag = false;
 
-            for (int i = 0; i < GameManager.Instance.Rstair_Comp.childCount; i++)
+            for (int i = 0; i < SinglePlay_GameManager.Instance.Rstair_Comp.childCount; i++)
             {
-                GoUp_RstairY[i] = GameManager.Instance.Rstair_Comp.GetChild(i).GetChild(0).position.y;
-                GoDown_RstairY[i] = GameManager.Instance.Rstair_Comp.GetChild(i).GetChild(0).position.y + 0.5f;
+                GoUp_RstairY[i] = SinglePlay_GameManager.Instance.Rstair_Comp.GetChild(i).GetChild(0).position.y;
+                GoDown_RstairY[i] = SinglePlay_GameManager.Instance.Rstair_Comp.GetChild(i).GetChild(0).position.y + 0.5f;
             }
 
-            for (int i = 0; i < GameManager.Instance.Lstair_Comp.childCount; i++)
+            for (int i = 0; i < SinglePlay_GameManager.Instance.Lstair_Comp.childCount; i++)
             {
-                GoUp_LstairY[i] = GameManager.Instance.Lstair_Comp.GetChild(i).GetChild(0).position.y;
-                GoDown_LstairY[i] = GameManager.Instance.Lstair_Comp.GetChild(i).GetChild(0).position.y + 0.5f;
+                GoUp_LstairY[i] = SinglePlay_GameManager.Instance.Lstair_Comp.GetChild(i).GetChild(0).position.y;
+                GoDown_LstairY[i] = SinglePlay_GameManager.Instance.Lstair_Comp.GetChild(i).GetChild(0).position.y + 0.5f;
             }
 
-            GoDown_Rstair_DiffY = GameManager.Instance.Rstair_Diff.GetChild(0).position.y;
-            GoUp_Rstair_DiffY = GameManager.Instance.Rstair_Diff.GetChild(0).position.y - 0.5f;
+            GoDown_Rstair_DiffY = SinglePlay_GameManager.Instance.Rstair_Diff.GetChild(0).position.y;
+            GoUp_Rstair_DiffY = SinglePlay_GameManager.Instance.Rstair_Diff.GetChild(0).position.y - 0.5f;
 
         }
 
@@ -129,49 +129,49 @@ namespace Com.WOF.Sungsoo
 
         void Char_GoDown() // 캐릭터가 계단을 내려가고 싶을 때.
         {
-            for (int i = 0; i < GameManager.Instance.Lstair_Comp.childCount; i++)
+            for (int i = 0; i < SinglePlay_GameManager.Instance.Lstair_Comp.childCount; i++)
             {
-                GameManager.Instance.Lstair_Comp.GetChild(i).GetChild(0).position =
-                    new Vector3(GameManager.Instance.Lstair_Comp.GetChild(i).GetChild(0).position.x,
-                    GoDown_LstairY[i], GameManager.Instance.Lstair_Comp.GetChild(i).GetChild(0).position.z);
+                SinglePlay_GameManager.Instance.Lstair_Comp.GetChild(i).GetChild(0).position =
+                    new Vector3(SinglePlay_GameManager.Instance.Lstair_Comp.GetChild(i).GetChild(0).position.x,
+                    GoDown_LstairY[i], SinglePlay_GameManager.Instance.Lstair_Comp.GetChild(i).GetChild(0).position.z);
             }
 
-            for (int i = 0; i < GameManager.Instance.Rstair_Comp.childCount; i++)
+            for (int i = 0; i < SinglePlay_GameManager.Instance.Rstair_Comp.childCount; i++)
             {
-                GameManager.Instance.Rstair_Comp.GetChild(i).GetChild(0).position =
-                    new Vector3(GameManager.Instance.Rstair_Comp.GetChild(i).GetChild(0).position.x,
-                    GoDown_RstairY[i], GameManager.Instance.Rstair_Comp.GetChild(i).GetChild(0).position.z);
+                SinglePlay_GameManager.Instance.Rstair_Comp.GetChild(i).GetChild(0).position =
+                    new Vector3(SinglePlay_GameManager.Instance.Rstair_Comp.GetChild(i).GetChild(0).position.x,
+                    GoDown_RstairY[i], SinglePlay_GameManager.Instance.Rstair_Comp.GetChild(i).GetChild(0).position.z);
             }
         }
 
         void Char_RstairDiff_Down() // 캐릭터와 별개의 오른쪽 계단과의 관계.
         {
-            GameManager.Instance.Rstair_Diff.GetChild(0).position = new Vector3(GameManager.Instance.Rstair_Diff.GetChild(0).position.x,
-                GoDown_Rstair_DiffY, GameManager.Instance.Rstair_Diff.GetChild(0).position.z);
+            SinglePlay_GameManager.Instance.Rstair_Diff.GetChild(0).position = new Vector3(SinglePlay_GameManager.Instance.Rstair_Diff.GetChild(0).position.x,
+                GoDown_Rstair_DiffY, SinglePlay_GameManager.Instance.Rstair_Diff.GetChild(0).position.z);
         }
 
         void Char_GoUp() // 캐릭터가 계단을 올라가고 싶을 때.
         {
-            for (int i = 0; i < GameManager.Instance.Lstair_Comp.childCount; i++)
+            for (int i = 0; i < SinglePlay_GameManager.Instance.Lstair_Comp.childCount; i++)
             {
-                GameManager.Instance.Lstair_Comp.GetChild(i).GetChild(0).position =
-                    new Vector3(GameManager.Instance.Lstair_Comp.GetChild(i).GetChild(0).position.x,
-                    GoUp_LstairY[i], GameManager.Instance.Lstair_Comp.GetChild(i).GetChild(0).position.z);
+                SinglePlay_GameManager.Instance.Lstair_Comp.GetChild(i).GetChild(0).position =
+                    new Vector3(SinglePlay_GameManager.Instance.Lstair_Comp.GetChild(i).GetChild(0).position.x,
+                    GoUp_LstairY[i], SinglePlay_GameManager.Instance.Lstair_Comp.GetChild(i).GetChild(0).position.z);
             }
 
-            for (int i = 0; i < GameManager.Instance.Rstair_Comp.childCount; i++)
+            for (int i = 0; i < SinglePlay_GameManager.Instance.Rstair_Comp.childCount; i++)
             {
-                GameManager.Instance.Rstair_Comp.GetChild(i).GetChild(0).position =
-                    new Vector3(GameManager.Instance.Rstair_Comp.GetChild(i).GetChild(0).position.x,
-                    GoUp_RstairY[i], GameManager.Instance.Rstair_Comp.GetChild(i).GetChild(0).position.z);
+                SinglePlay_GameManager.Instance.Rstair_Comp.GetChild(i).GetChild(0).position =
+                    new Vector3(SinglePlay_GameManager.Instance.Rstair_Comp.GetChild(i).GetChild(0).position.x,
+                    GoUp_RstairY[i], SinglePlay_GameManager.Instance.Rstair_Comp.GetChild(i).GetChild(0).position.z);
             }
 
         }
 
         void Char_RstairDiff_Up() // 캐릭터와 별개의 오른쪽 계단과의 관계.
         {
-            GameManager.Instance.Rstair_Diff.GetChild(0).position = new Vector3(GameManager.Instance.Rstair_Diff.GetChild(0).position.x,
-                GoUp_Rstair_DiffY, GameManager.Instance.Rstair_Diff.GetChild(0).position.z);
+            SinglePlay_GameManager.Instance.Rstair_Diff.GetChild(0).position = new Vector3(SinglePlay_GameManager.Instance.Rstair_Diff.GetChild(0).position.x,
+                GoUp_Rstair_DiffY, SinglePlay_GameManager.Instance.Rstair_Diff.GetChild(0).position.z);
         }
         // 드래그 끝.
         public void DragEnd()

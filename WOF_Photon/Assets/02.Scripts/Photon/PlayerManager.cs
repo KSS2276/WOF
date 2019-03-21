@@ -93,7 +93,7 @@ namespace Com.WOF.Sungsoo
 
             if (Health <= 0f)
             {
-                GameManager.Instance.LeaveRoome();
+                //SinglePlay_GameManager.Instance.LeaveRoome();
             }
 
             if (photonView.IsMine)

@@ -5,10 +5,8 @@ using UnityEngine;
 
 namespace Com.WOF.Sungsoo
 {
-    public class Player_Manager : MonoBehaviour
+    public class SinglePlay_PlayerManager : MonoBehaviour
     {
-        GameObject LauncherScript;
-
         CharacterController controller;
         Animator animator;
         public Transform[] respawns;
@@ -24,7 +22,7 @@ namespace Com.WOF.Sungsoo
 
         void Awake()
         {
-            LauncherScript = GameObject.Find("Launcher");
+
         }
         // Use this for initialization
         void Start()
@@ -83,10 +81,5 @@ namespace Com.WOF.Sungsoo
             animator.SetBool(animName, animState);
         }
 
-        public void LeaveSingleGame()
-        {
-            Launcher.isSingleFinished = true;
-            LauncherScript.GetComponent<Launcher>().LeaveSinglePlay();
-        }
     }
 }
