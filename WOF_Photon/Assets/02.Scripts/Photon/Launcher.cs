@@ -7,6 +7,7 @@ using Photon.Realtime;
 using UnityEngine.UI;
 using System.Text.RegularExpressions;
 using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
 
 
 namespace Com.WOF.Sungsoo
@@ -37,13 +38,23 @@ namespace Com.WOF.Sungsoo
         private GameObject MultiPlay_Panel;
 
         [SerializeField]
-        private List<GameObject> SingleMode_Theme = new List<GameObject>();
- 
+        private GameObject SinglePlay_Theme;
+
+        [SerializeField]
+        private List<GameObject> SinglePlay_EachTheme = new List<GameObject>();
+
+        [SerializeField]
+        private GameObject SinglePlay_EachStage;
+
+        [SerializeField]
+        private GameObject Character_Panel;
         #endregion
 
         #region Priavte Fields
-        private string serverURL = "http://13.209.6.8:3000/";
         bool isConnecting;
+        private string serverURL = "http://13.209.6.8:3000/";
+
+
         /// <summary>
         /// This client's version number. Users are separated from each other by gameVersion (which allows you to make breaking changes).
         /// </summary>
@@ -51,7 +62,7 @@ namespace Com.WOF.Sungsoo
         string gameVersion = "1";
 
 
- 
+
 
         [SerializeField]
         public class PlayerInfo
@@ -63,14 +74,6 @@ namespace Com.WOF.Sungsoo
             public int kill;
             public int death;
             public int assi;
-
-
-            //public class stage_char_JSON
-            //{
-            //    public bool[] character;
-            //    public int[] stage;
-            //    public int[] stage_Max;
-            //}
 
         }
 
@@ -90,7 +93,10 @@ namespace Com.WOF.Sungsoo
         stage_char_JSON scJSON = new stage_char_JSON();
 
         public static int randomRoomNumber;
-
+        public static bool isSingleFinished = false;
+        public static bool isMultiFinished = false;
+        public static int themeSeq;
+        public static string Selected_CharName = "WF1";
         #region MonoBehaviour CallBacks
         #endregion
 
@@ -111,6 +117,7 @@ namespace Com.WOF.Sungsoo
 
         IEnumerator AwakeCor()
         {
+            Debug.Log("AwakeCor");
             user.serialNum = SystemInfo.deviceUniqueIdentifier;
             WWWForm form = new WWWForm();
             form.AddField("code", user.serialNum);
@@ -141,14 +148,25 @@ namespace Com.WOF.Sungsoo
                     Control_Panel.SetActive(true);
                     GameMode_Panel.SetActive(false);
                 }
+                else if (user.check == "true" && isSingleFinished) // 싱글모드 종료 시.
+                {
+                    Control_Panel.SetActive(false);
+                    GameMode_Panel.SetActive(false);
+                    gameMode_Nickname.transform.GetChild(0).GetComponent<Text>().text = "닉네임 : " + user.username;
+                    gameMode_Nickname.SetActive(true);
+                    GoToSinglePlay_Setting();
+                    yield return new WaitForSeconds(0.1f);
+                    SinglePlay_ChoiceTheme();
+
+                }
+                //멀티 모드 종료 시 구현해야함. 190314
                 else
                 {
                     Control_Panel.SetActive(false);
                     GameMode_Panel.SetActive(true);
                     gameMode_Nickname.transform.GetChild(0).GetComponent<Text>().text = "닉네임 : " + user.username;
                     gameMode_Nickname.SetActive(true);
-                    StartCoroutine(Send_Alarm("환영합니다."));
-
+                    StartCoroutine(Send_Alarm(user.username + "님 환영합니다."));
                 }
 
             }
@@ -163,7 +181,7 @@ namespace Com.WOF.Sungsoo
         // Start is called before the first frame update
         void Start()
         {
-            DontDestroyOnLoad(gameObject);
+            //DontDestroyOnLoad(gameObject);
             Progress_Label.SetActive(false);
             Control_Panel.SetActive(true);
         }
@@ -184,9 +202,11 @@ namespace Com.WOF.Sungsoo
 
 
 
-        public void GoToMultiPlay()
+        public void GoToMultiPlay_Setting()
         {
             GameMode_Panel.SetActive(false);
+            isSingleFinished = false;
+            isMultiFinished = true;
             PhotonNetwork.AutomaticallySyncScene = true;
         }
 
@@ -196,12 +216,12 @@ namespace Com.WOF.Sungsoo
             PhotonNetwork.CreateRoom("" + roomNum, new RoomOptions { MaxPlayers = maxPlayersPerRoom });
         }
 
-        public void GoToSinglePlay()
+        public void GoToSinglePlay_Setting()
         {
-            StartCoroutine(GoToSinglePlay_Cor());
+            StartCoroutine(GoToSinglePlaySetting_Cor());
         }
 
-        IEnumerator GoToSinglePlay_Cor()
+        IEnumerator GoToSinglePlaySetting_Cor()
         {
             WWWForm form = new WWWForm();
             form.AddField("code", user.serialNum);
@@ -217,12 +237,13 @@ namespace Com.WOF.Sungsoo
                 //    "check":"true",
                 //    "scJSON":{"character":[false,false,false,false,false,false], "stage":[1,0,0,0,0,0]}
                 //}
-
+                isSingleFinished = true;
+                isMultiFinished = false;
                 Debug.Log("GoToSinglePlay_Result : " + wwwResult); // Json 결과 값 콘솔 창에 표시.
-                Debug.Log(JsonUtility.FromJson<PlayerInfo>(wwwResult).check); 
+                Debug.Log(JsonUtility.FromJson<PlayerInfo>(wwwResult).check);
 
 
-                scJSON.stage = JsonUtility.FromJson<stage_char_JSON>(wwwResult).stage; 
+                scJSON.stage = JsonUtility.FromJson<stage_char_JSON>(wwwResult).stage;
                 scJSON.character = JsonUtility.FromJson<stage_char_JSON>(wwwResult).character;
 
                 GameMode_Panel.SetActive(false);
@@ -234,21 +255,21 @@ namespace Com.WOF.Sungsoo
                 {
                     if (scJSON.character[i])
                     {
-                        SingleMode_Theme[i].GetComponent<Button>().interactable = true;
-                        SingleMode_Theme[i].GetComponent<Image>().color = new Color32(255, 255, 255, 255);
+                        SinglePlay_EachTheme[i].GetComponent<Button>().interactable = true;
+                        SinglePlay_EachTheme[i].GetComponent<Image>().color = new Color32(255, 255, 255, 255);
                     }
-                    else if(i < 5 && !scJSON.character[i])
+                    else if (i < 5 && !scJSON.character[i])
                     {
-                        SingleMode_Theme[i + 1].GetComponent<Button>().interactable = false;
-                        SingleMode_Theme[i + 1].GetComponent<Image>().color = new Color32(150, 150, 150, 255);
+                        SinglePlay_EachTheme[i + 1].GetComponent<Button>().interactable = false;
+                        SinglePlay_EachTheme[i + 1].GetComponent<Image>().color = new Color32(150, 150, 150, 255);
                     }
-                    else if(i == 5 && !scJSON.character[i])
+                    else if (i == 5 && !scJSON.character[i])
                     {
-                        SingleMode_Theme[i].GetComponent<Button>().interactable = false;
-                        SingleMode_Theme[i].GetComponent<Image>().color = new Color32(150, 150, 150, 255);
+                        SinglePlay_EachTheme[i].GetComponent<Button>().interactable = false;
+                        SinglePlay_EachTheme[i].GetComponent<Image>().color = new Color32(150, 150, 150, 255);
                     }
 
-                    SingleMode_Theme[i].transform.GetChild(0).GetComponent<Text>().text = scJSON.stage[i] + " / " + scJSON.stage_Max[i];
+                    SinglePlay_EachTheme[i].transform.GetChild(0).GetComponent<Text>().text = scJSON.stage[i] + " / " + scJSON.stage_Max[i];
                     // 스테이지 별 현재 깬 스테이지 / 맥스 스테이지 표시.
 
                 }
@@ -258,6 +279,65 @@ namespace Com.WOF.Sungsoo
                 StartCoroutine(Send_Alarm("서버와 연결이 끊어졌습니다."));
             }
 
+        }
+        //    "scJSON":{"character":[false,false,false,false,false,false], "stage":[1,0,0,0,0,0]}
+
+        public void SinglePlay_ChoiceTheme()
+        {
+            try
+            {
+                themeSeq = EventSystem.current.currentSelectedGameObject.transform.GetSiblingIndex(); // 클릭한 테마의 배열번호 temp에 저장.
+            }
+            catch
+            {
+                
+            }
+
+            Debug.Log(themeSeq);
+
+            SinglePlay_Theme.SetActive(false); // 테마 false
+            SinglePlay_EachStage.SetActive(true); // 선택한 스테이지 부모 true
+
+            SinglePlay_EachStage.transform.GetChild(themeSeq).GetChild(1).GetChild(1).GetComponent<Scrollbar>().value = 0;
+
+            for (int i = 0; i < SinglePlay_EachStage.transform.childCount; i++)
+                SinglePlay_EachStage.transform.GetChild(i).gameObject.SetActive(false);
+
+            SinglePlay_EachStage.transform.GetChild(themeSeq).gameObject.SetActive(true);
+            Character_Panel.SetActive(true);
+
+            for (int i = 0; i < scJSON.stage[themeSeq]; i++)
+            {
+                SinglePlay_EachStage.transform.GetChild(themeSeq).GetChild(1).GetChild(0).GetChild(0).GetChild(i).GetComponent<Button>().interactable = true;
+            }
+
+            for (int i = 0; i < scJSON.character.Length; i++) // 캐릭터 패널 초기화.
+            {
+                if (scJSON.character[i])
+                {
+                    Character_Panel.transform.GetChild(i + 1).GetComponent<Button>().interactable = true;
+                }
+                else
+                {
+                    Character_Panel.transform.GetChild(i + 1).GetComponent<Button>().interactable = false;
+                }
+            }
+        }
+
+        public void Choice_Character() // 캐릭터 고르기.
+        {
+            Selected_CharName = EventSystem.current.currentSelectedGameObject.name;
+            Character_Panel.transform.GetChild(Character_Panel.transform.childCount - 1).position = EventSystem.current.currentSelectedGameObject.transform.position;
+        }
+
+        public void GoToSinglePlay() // 선택한 싱글 게임 입장.
+        {
+            SceneManager.LoadScene("S"+(EventSystem.current.currentSelectedGameObject.transform.parent.parent.parent.parent.GetSiblingIndex()+1)+(EventSystem.current.currentSelectedGameObject.transform.GetSiblingIndex()+1));
+        }
+
+        public void LeaveSinglePlay()
+        {
+            StartCoroutine(AwakeCor());
         }
 
 

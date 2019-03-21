@@ -9,6 +9,8 @@ namespace Com.WOF.Sungsoo
 {
     public class GameManager : MonoBehaviourPunCallbacks
     {
+        GameObject LauncherScript;
+
         public static GameManager Instance;
         public GameObject playerPrefab;
         public GameObject Player;
@@ -41,7 +43,7 @@ namespace Com.WOF.Sungsoo
 
         void Awake()
         {
-
+            LauncherScript = GameObject.Find("Launcher");
         }
 
 
@@ -178,6 +180,7 @@ namespace Com.WOF.Sungsoo
             }
         }
 
+
         void LoadArena()
         {
 
@@ -214,6 +217,12 @@ namespace Com.WOF.Sungsoo
 
                 LoadArena();
             }
+        }
+
+        public void LeaveSingleGame()
+        {
+            Launcher.isSingleFinished = true;
+            SceneManager.LoadScene("Launcher");
         }
 
         #endregion

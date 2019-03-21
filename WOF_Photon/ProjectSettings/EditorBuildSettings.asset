@@ -9,7 +9,7 @@ EditorBuildSettings:
     path: 
     guid: 00000000000000000000000000000000
   - enabled: 1
-    path: Assets/01.Scenes/Launcher.unity.unity
+    path: Assets/01.Scenes/Launcher.unity
     guid: aefd39fe3ced6f147ab974cbbfec2ad9
   - enabled: 1
     path: Assets/01.Scenes/Room for 1.unity
@@ -23,4 +23,28 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/01.Scenes/Room for 4.unity
     guid: 4581eace1b7085246921ee48a7e64edb
+  - enabled: 1
+    path: Assets/01.Scenes/S11.unity
+    guid: 564c9cfbab34f334e9d4f60c0e450c82
+  - enabled: 1
+    path: Assets/01.Scenes/S12.unity
+    guid: 3e7056e9ac9333943a9231d9fbcbe989
+  - enabled: 1
+    path: Assets/01.Scenes/S13.unity
+    guid: 781b3a122b135204d95e0afeaecf7977
+  - enabled: 1
+    path: Assets/01.Scenes/S14.unity
+    guid: 8e7424c8c17c0514caa7af193e1ba6ee
+  - enabled: 1
+    path: Assets/01.Scenes/S15.unity
+    guid: 88a25cef4fe5453488068fffb4fe4311
+  - enabled: 1
+    path: Assets/01.Scenes/S16.unity
+    guid: 39a8f5595b997f74d81ead08d0c516b5
+  - enabled: 1
+    path: Assets/01.Scenes/S17.unity
+    guid: 8aab8c9d3491d9b478db17c2460d00a7
+  - enabled: 1
+    path: Assets/01.Scenes/TestRoom_1.unity
+    guid: ca15e0af773a8a047bdc1ea415181578
   m_configObjects: {}

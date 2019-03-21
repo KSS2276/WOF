@@ -7,28 +7,29 @@ namespace Com.WOF.Sungsoo
 {
     public class Player_Manager : MonoBehaviour
     {
+        GameObject LauncherScript;
 
         CharacterController controller;
-        Rigidbody rb;
         Animator animator;
         public Transform[] respawns;
 
         private Vector3 MoveDir;
-
         public bool isJump = false;
         int jumpCount = 2;
-        bool alreadyJump;
+        public bool alreadyJump;
         public float jumpSpeed = 7.0f;
         public float gravity = 1.0f;
 
         [SerializeField] JoyStick joystick;
 
-
+        void Awake()
+        {
+            LauncherScript = GameObject.Find("Launcher");
+        }
         // Use this for initialization
         void Start()
         {
             controller = GetComponent<CharacterController>();
-            rb = GetComponent<Rigidbody>();
             animator = GetComponent<Animator>();
 
             MoveDir = Vector3.zero;
@@ -39,10 +40,18 @@ namespace Com.WOF.Sungsoo
         {
             if (jumpCount > 0)
             {
+                jumpCount--;
                 isJump = true;
-                JoyStick.jumpComplete = false;
+                StartCoroutine(AJ());
             }
+        }
 
+        IEnumerator AJ()
+        {
+            yield return null;
+            alreadyJump = true;
+            yield return new WaitForSeconds(0.5f);
+            alreadyJump = false;
         }
 
         public void ChangLayer(int num)
@@ -60,6 +69,10 @@ namespace Com.WOF.Sungsoo
             }
             isJump = false;
 
+
+            if (controller.isGrounded)
+                jumpCount = 2;
+
             MoveDir.y -= gravity * Time.deltaTime;
             controller.Move(MoveDir * Time.deltaTime);
         }
@@ -70,5 +83,10 @@ namespace Com.WOF.Sungsoo
             animator.SetBool(animName, animState);
         }
 
+        public void LeaveSingleGame()
+        {
+            Launcher.isSingleFinished = true;
+            LauncherScript.GetComponent<Launcher>().LeaveSinglePlay();
+        }
     }
 }

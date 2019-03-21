@@ -103,7 +103,7 @@ namespace Com.WOF.Sungsoo
                 Player.MoveAnimator("run", true);
             }
 
-            if (JoyVec.y > 0.7 && !jumpComplete) // 점프            
+            if (JoyVec.y > 0.7) // 점프            
                 Player.IsJump();
             
 
