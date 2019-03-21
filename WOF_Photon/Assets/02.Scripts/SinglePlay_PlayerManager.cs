@@ -25,6 +25,7 @@ namespace Com.WOF.Sungsoo
 
         }
         // Use this for initialization
+
         void Start()
         {
             controller = GetComponent<CharacterController>();

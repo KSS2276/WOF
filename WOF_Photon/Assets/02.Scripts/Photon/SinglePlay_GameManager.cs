@@ -10,6 +10,7 @@ namespace Com.WOF.Sungsoo
     public class SinglePlay_GameManager : MonoBehaviourPunCallbacks
     {
         GameObject LauncherScript;
+        private string serverURL = "http://13.209.6.8:3000/";
 
         public static SinglePlay_GameManager Instance;
         public GameObject playerPrefab;
@@ -31,6 +32,9 @@ namespace Com.WOF.Sungsoo
         public Transform Rstair_Diff;
 
         public Transform Floor_Diff;
+
+        public GameObject Option_Panel;
+
         float HoldZ = -1.43f;
         #region Photon Callbacks
 
@@ -110,7 +114,7 @@ namespace Com.WOF.Sungsoo
 
             for (int i = 0; i < Floor_Diff.childCount; i++)
             {
-                if (Vector3.Distance(PlayerRoof.position ,Floor_Diff.GetChild(i).GetChild(0).position) < 0.6f && (joyStick.GetComponent<JoyStick>().JoyVec.y <= -0.8f))
+                if (Vector3.Distance(PlayerRoof.position, Floor_Diff.GetChild(i).GetChild(0).position) < 0.6f && (joyStick.GetComponent<JoyStick>().JoyVec.y <= -0.8f))
                 {
                     Floor_Diff.GetChild(i).GetComponent<BoxCollider>().isTrigger = true;
                 }
@@ -219,12 +223,63 @@ namespace Com.WOF.Sungsoo
         //    }
         //}
 
+        public void Option_Open()
+        {
+            Time.timeScale = 0f;
+            Option_Panel.SetActive(true);
+        }
+
+        public void Option_Close()
+        {
+            Time.timeScale = 1f;
+            Option_Panel.SetActive(false);
+        }
+
         public void LeaveSingleGame()
         {
             Launcher.isSingleFinished = true;
+            Destroy(LauncherScript);
             SceneManager.LoadScene("Launcher");
         }
 
+        public void TestVersion_GameClear()
+        {
+            StartCoroutine(TestVersion_GameClear_Cor());
+        }
+
+        IEnumerator TestVersion_GameClear_Cor()
+        {
+            if (Launcher.stageSeq < 5)
+                Launcher.stageSeq += 1;
+            
+                
+            WWWForm form = new WWWForm();
+
+            form.AddField("code", Launcher.user.serialNum);
+            form.AddField("stage", "" + Launcher.scJSON.stage);
+            form.AddField("character", "" + Launcher.scJSON.character);
+
+            WWW www = new WWW(serverURL + "single", form);
+            yield return www;
+            string wwwResult = www.text;
+            Debug.Log("Recieve : " + wwwResult);
+            Debug.Log("SerialNum : " + Launcher.user.serialNum);
+
+
+
+            if (wwwResult != "Unauthorized")
+            {
+                Debug.Log(JsonUtility.FromJson<Launcher.PlayerInfo>(wwwResult));
+                Debug.Log(JsonUtility.FromJson<Launcher.PlayerInfo>(wwwResult).check);
+                Debug.Log(JsonUtility.FromJson<Launcher.PlayerInfo>(wwwResult).username);
+                Launcher.user.check = JsonUtility.FromJson<Launcher.PlayerInfo>(wwwResult).check;
+                Launcher.user.username = JsonUtility.FromJson<Launcher.PlayerInfo>(wwwResult).username;
+
+                Debug.Log(wwwResult);
+
+            }
+        }
         #endregion
+
     }
 }

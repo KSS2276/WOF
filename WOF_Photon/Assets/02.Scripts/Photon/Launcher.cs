@@ -85,14 +85,16 @@ namespace Com.WOF.Sungsoo
 
         #endregion
 
-        PlayerInfo user = new PlayerInfo();
-        stage_char_JSON scJSON = new stage_char_JSON();
+        public static PlayerInfo user = new PlayerInfo();
+        public static stage_char_JSON scJSON = new stage_char_JSON();
 
         public static int randomRoomNumber;
         public static bool isSingleFinished = false;
         public static bool isMultiFinished = false;
         public static int themeSeq;
+        public static int stageSeq;
         public static string Selected_CharName = "WF1";
+        
         #region MonoBehaviour CallBacks
         #endregion
 
@@ -112,6 +114,7 @@ namespace Com.WOF.Sungsoo
         // Start is called before the first frame update
         void Start()
         {
+            DontDestroyOnLoad(gameObject);
             Progress_Label.SetActive(false);
             Control_Panel.SetActive(true);
         }
@@ -161,12 +164,10 @@ namespace Com.WOF.Sungsoo
 
             }
 
-            Debug.Log(themeSeq);
-
             SinglePlay_Theme.SetActive(false); // 테마 false
             SinglePlay_EachStage.SetActive(true); // 선택한 스테이지 부모 true
 
-            SinglePlay_EachStage.transform.GetChild(themeSeq).GetChild(1).GetChild(1).GetComponent<Scrollbar>().value = 0;
+            SinglePlay_EachStage.transform.GetChild(themeSeq).GetChild(0).GetChild(1).GetComponent<Scrollbar>().value = 0;
 
             for (int i = 0; i < SinglePlay_EachStage.transform.childCount; i++)
                 SinglePlay_EachStage.transform.GetChild(i).gameObject.SetActive(false);
@@ -176,7 +177,7 @@ namespace Com.WOF.Sungsoo
 
             for (int i = 0; i < scJSON.stage[themeSeq]; i++)
             {
-                SinglePlay_EachStage.transform.GetChild(themeSeq).GetChild(1).GetChild(0).GetChild(0).GetChild(i).GetComponent<Button>().interactable = true;
+                SinglePlay_EachStage.transform.GetChild(themeSeq).GetChild(0).GetChild(0).GetChild(0).GetChild(i).GetComponent<Button>().interactable = true;
             }
 
             for (int i = 0; i < scJSON.character.Length; i++) // 캐릭터 패널 초기화.
@@ -200,6 +201,7 @@ namespace Com.WOF.Sungsoo
 
         public void GoToSinglePlay() // 선택한 싱글 게임 입장.
         {
+            stageSeq = EventSystem.current.currentSelectedGameObject.transform.GetSiblingIndex() + 1;
             SceneManager.LoadScene("S" + (EventSystem.current.currentSelectedGameObject.transform.parent.parent.parent.parent.GetSiblingIndex() + 1) + (EventSystem.current.currentSelectedGameObject.transform.GetSiblingIndex() + 1));
         }
 
@@ -253,7 +255,6 @@ namespace Com.WOF.Sungsoo
 
         IEnumerator AwakeCor()
         {
-            Debug.Log("AwakeCor");
             user.serialNum = SystemInfo.deviceUniqueIdentifier;
             WWWForm form = new WWWForm();
             form.AddField("code", user.serialNum);
